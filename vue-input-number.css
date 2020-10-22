@@ -1,0 +1,6 @@
+.input-number			{ user-select : none; display: flex; vertical-align : middle; }
+.input-number-text		{ text-align: right; }
+.spin-block				{ display: flex; flex-direction : column; }
+.spin					{ border: solid 0.5px #000000;	}
+.spin:hover				{ background-color: cyan;	}
+.spin-button			{ stroke:#000000; fill:#000000;	}

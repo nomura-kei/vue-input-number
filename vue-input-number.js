@@ -15,7 +15,7 @@ Vue.component('input-number', {
 
 	////////////////////////////////////////////////////////////////////////
 	//
-	// ƒvƒƒpƒeƒB
+	// ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£
 	//
 	props : {
 		value  : { type : Number, required : true },
@@ -41,11 +41,15 @@ Vue.component('input-number', {
 				return FORMAT_PATTERN.test(value);
 			}
 		},
+		isReadonly : {
+			type		: Boolean,
+			default		: false
+		}
 	},
 
 	////////////////////////////////////////////////////////////////////////
 	//
-	// ƒf[ƒ^
+	// ãƒ‡ãƒ¼ã‚¿
 	//
 	//
 	data : function() {
@@ -58,14 +62,14 @@ Vue.component('input-number', {
 
 	////////////////////////////////////////////////////////////////////////
 	//
-	// ƒƒ\ƒbƒh
+	// ãƒ¡ã‚½ãƒƒãƒ‰
 	//
 	methods : {
 
 		/**
-		 * ƒtƒH[ƒ}ƒbƒgî•ñ‚ğæ“¾‚µ‚Ü‚·B
+		 * ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆæƒ…å ±ã‚’å–å¾—ã—ã¾ã™ã€‚
 		 *
-		 * @return ƒtƒH[ƒ}ƒbƒgî•ñ
+		 * @return ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆæƒ…å ±
 		 */
 		getFormatInfo : function() {
 			var info = {};
@@ -76,41 +80,44 @@ Vue.component('input-number', {
 
 
 		/**
-		 * w’è‚³‚ê‚½”’l‚ğ format ‚É]‚¢A•\¦—p•¶š—ñ‚É•ÏŠ·‚µ‚Ü‚·B
+		 * æŒ‡å®šã•ã‚ŒãŸæ•°å€¤ã‚’ format ã«å¾“ã„ã€è¡¨ç¤ºç”¨æ–‡å­—åˆ—ã«å¤‰æ›ã—ã¾ã™ã€‚
 		 *
-		 * @param numValue ”’l
-		 * @return •\¦—p•¶š—ñ
+		 * @param numValue æ•°å€¤
+		 * @return è¡¨ç¤ºç”¨æ–‡å­—åˆ—
 		 */
 		toDisplayValue : function(numValue) {
 
-			// ”’l --(i”‚É‰‚¶‚Ä)--> •¶š—ñ‰»
+			// æ•°å€¤ --(é€²æ•°ã«å¿œã˜ã¦)--> æ–‡å­—åˆ—åŒ–
 			let fmt   = this.getFormatInfo();
 			var tmpStrValue = numValue.toString(fmt.info.radix);
+			if (fmt.match.groups.format == 'X') {
+				tmpStrValue = tmpStrValue.toUpperCase();
+			}
 
-			// [•„†][®”][ƒhƒbƒg][¬”] ‚É•ªŠ„
+			// [ç¬¦å·][æ•´æ•°][ãƒ‰ãƒƒãƒˆ][å°æ•°] ã«åˆ†å‰²
 			let match       = tmpStrValue.match(fmt.info["fixed-input"]);
 			if (!match) {
 				console.error("Invalid value : " + numValue + " (format = " + this.format + ")");
 				return "0";
 			}
 
-			// [®”•”] ƒpƒfƒBƒ“ƒO’Ç‰Á
+			// [æ•´æ•°éƒ¨] ãƒ‘ãƒ‡ã‚£ãƒ³ã‚°è¿½åŠ 
 			var decimalStr = match.groups.decimal;
 			if (fmt.match.groups.padding && (fmt.match.groups.padding.charAt(0) == '0')) {
 				decimalPadSize = fmt.match.groups.padding.substring(1, fmt.match.groups.padding.length) - 0;
 				decimalStr     = decimalStr.padStart(decimalPadSize, '0');
 			}
 
-			// [¬”•”] ƒpƒfƒBƒ“ƒO’Ç‰Á
+			// [å°æ•°éƒ¨] ãƒ‘ãƒ‡ã‚£ãƒ³ã‚°è¿½åŠ 
 			var fractionStr = match.groups.fraction;
 			if (fmt.match.groups.paddingfloat) {
 				fractionPadSize = fmt.match.groups.paddingfloat - 0;
 				fractionStr     = fractionStr.padEnd(fractionPadSize, "0");
-				// Œ…‘µ‚¦
+				// æ¡æƒãˆ
 				fractionStr     = fractionStr.slice(0, fractionPadSize);
 			}
 
-			// ÄŒ‹‡
+			// å†çµåˆ
 			tmpStrValue = "";
 			tmpStrValue += (fmt.match.groups.prefix) ? fmt.match.groups.prefix : "";
 			tmpStrValue += (match.groups.neg) ? match.groups.neg : "";
@@ -125,47 +132,47 @@ Vue.component('input-number', {
 		},
 
 		/**
-		 * format ‚É]‚Á‚½•¶š—ñ‚ğA”’l‚É•ÏŠ·‚µ‚Ü‚·B
+		 * format ã«å¾“ã£ãŸæ–‡å­—åˆ—ã‚’ã€æ•°å€¤ã«å¤‰æ›ã—ã¾ã™ã€‚
 		 *
-		 * @param strValue •¶š—ñ
-		 * @return ”’l
+		 * @param strValue æ–‡å­—åˆ—
+		 * @return æ•°å€¤
 		 */
 		toValue : function(strValue) {
 			let fmt    = this.getFormatInfo();
 			var tmpStrValue = strValue;
 
-			// prefix œ‹
+			// prefix é™¤å»
 			let prefix = fmt.match.groups.prefix;
 			if (tmpStrValue.indexOf(prefix) == 0) {
 				tmpStrValue = tmpStrValue.substring(prefix.length);
 			}
 
-			// suffix œ‹
+			// suffix é™¤å»
 			let suffix = fmt.match.groups.suffix;
 			if (tmpStrValue.lastIndexOf(suffix) == (tmpStrValue.length - suffix.length)) {
 				tmpStrValue = tmpStrValue.substring(0, (tmpStrValue.length - suffix.length));
 			}
 
-			// [•„†][®”][ƒhƒbƒg][¬”] ‚É•ªŠ„
+			// [ç¬¦å·][æ•´æ•°][ãƒ‰ãƒƒãƒˆ][å°æ•°] ã«åˆ†å‰²
 			let match = tmpStrValue.match(fmt.info["fixed-input"]);
 			if (!match) {
 				console.error("Invalid value : " + strValue + " (format = " + this.format + ")");
 				return 0;
 			}
 
-			// [®”•”] ƒpƒfƒBƒ“ƒOœ‹
+			// [æ•´æ•°éƒ¨] ãƒ‘ãƒ‡ã‚£ãƒ³ã‚°é™¤å»
 			var decimalStr = match.groups.decimal;
 			if (fmt.match.groups.padding && (fmt.match.groups.padding.charAt(0) == '0')) {
 				decimalStr = decimalStr.replace(/^0+/, "");
 			}
 
-			// [¬”•”] ƒpƒfƒBƒ“ƒOíœ
+			// [å°æ•°éƒ¨] ãƒ‘ãƒ‡ã‚£ãƒ³ã‚°å‰Šé™¤
 			var fractionStr = match.groups.fraction;
 			if (fmt.match.groups.paddingfloat) {
 				fractionStr = fractionStr.replace(/0+$/, "");
 			}
 
-			// ÄŒ‹‡
+			// å†çµåˆ
 			tmpStrValue = "";
 			tmpStrValue += (match.groups.neg) ? match.groups.neg : "";
 			tmpStrValue += (decimalStr) ? decimalStr       : "";
@@ -174,7 +181,7 @@ Vue.component('input-number', {
 				tmpStrValue += (fractionStr) ? fractionStr      : "";
 			}
 
-			// ”’l‰»
+			// æ•°å€¤åŒ–
 			var tmpNumValue;
 			if (fmt.match.groups.format == 'f') {
 				tmpNumValue = parseFloat(tmpStrValue);
@@ -182,7 +189,7 @@ Vue.component('input-number', {
 				tmpNumValue = parseInt(tmpStrValue, fmt.info.radix);
 			}
 
-			// ”’l‰»‚Å‚«‚È‚¢ê‡‚Í 0 ‚ğİ’è‚µ‚Ä‚¨‚­
+			// æ•°å€¤åŒ–ã§ããªã„å ´åˆã¯ 0 ã‚’è¨­å®šã—ã¦ãŠã
 			if (isNaN(tmpNumValue)) {
 				tmpNumValue = 0;
 			}
@@ -191,11 +198,11 @@ Vue.component('input-number', {
 		},
 
 		/**
-		 * w’è‚³‚ê‚½’l numValue ‚É step ‚Ì’l‚ğ‘«‚µ‡‚í‚¹‚Ü‚·B
-		 * ‘«‚µ‡‚í‚¹Œã‚Ì—LŒøŒ…”‚ÍAstep ‚ÌŒ…”‚É‡‚í‚¹‚ç‚ê‚Ü‚·B
+		 * æŒ‡å®šã•ã‚ŒãŸå€¤ numValue ã« step ã®å€¤ã‚’è¶³ã—åˆã‚ã›ã¾ã™ã€‚
+		 * è¶³ã—åˆã‚ã›å¾Œã®æœ‰åŠ¹æ¡æ•°ã¯ã€step ã®æ¡æ•°ã«åˆã‚ã›ã‚‰ã‚Œã¾ã™ã€‚
 		 *
-		 * @param numValue ”’l
-		 * @param step     ‘«‚µ‡‚í‚¹‚é”
+		 * @param numValue æ•°å€¤
+		 * @param step     è¶³ã—åˆã‚ã›ã‚‹æ•°
 		 */
 		roundStep : function(numValue, step) {
 			var tmpNumValue = numValue + step;
@@ -211,7 +218,7 @@ Vue.component('input-number', {
 		},
 
 		/**
-		 * ’l‚ğ +step ‚µ‚Ü‚·B
+		 * å€¤ã‚’ +step ã—ã¾ã™ã€‚
 		 */
 		spinUp : function() {
 			document.getSelection().empty();
@@ -221,7 +228,7 @@ Vue.component('input-number', {
 		},
 
 		/**
-		 * ’l‚ğ -step ‚µ‚Ü‚·B
+		 * å€¤ã‚’ -step ã—ã¾ã™ã€‚
 		 */
 		spinDown : function() {
 			document.getSelection().empty();
@@ -231,7 +238,7 @@ Vue.component('input-number', {
 		},
 
 		/**
-		 * “ü—Í’l•Ï‰»”­¶‚ÉŒÄ‚Ño‚³‚ê‚Ü‚·B
+		 * å…¥åŠ›å€¤å¤‰åŒ–ç™ºç”Ÿæ™‚ã«å‘¼ã³å‡ºã•ã‚Œã¾ã™ã€‚
 		 */
 		changedValue : function(event) {
 			var tmpNumValue = this.toValue(event.target.value);
@@ -240,27 +247,27 @@ Vue.component('input-number', {
 
 
 		/**
-		 * w’è‚³‚ê‚½’l‚ÉXV‚µ‚Ü‚·B
+		 * æŒ‡å®šã•ã‚ŒãŸå€¤ã«æ›´æ–°ã—ã¾ã™ã€‚
 		 *
-		 * @param numValue ’l
+		 * @param numValue å€¤
 		 */
 		updateValue : function(numValue) {
-			// ’l”ÍˆÍƒ`ƒFƒbƒN
+			// å€¤ç¯„å›²ãƒã‚§ãƒƒã‚¯
 			var tmpNumValue = numValue;
 			if (tmpNumValue < this.min) { tmpNumValue = this.min; }
 			if (tmpNumValue > this.max) { tmpNumValue = this.max; }
 
-			// •\¦”’l•¶š—ñŠm’è
+			// è¡¨ç¤ºæ•°å€¤æ–‡å­—åˆ—ç¢ºå®š
 			tmpDisplayValue = this.toDisplayValue(tmpNumValue);
 			this.displayValue = tmpDisplayValue;
 
-			// ”’lŠm’è
+			// æ•°å€¤ç¢ºå®š
 			tmpNumValue = this.toValue(tmpDisplayValue);
 			this.$emit('input', tmpNumValue);
 		},
 
 		/**
-		 * £‰Ÿ‰º‚ÉŒÄ‚Ño‚³‚ê‚Ü‚·B
+		 * â–²æŠ¼ä¸‹æ™‚ã«å‘¼ã³å‡ºã•ã‚Œã¾ã™ã€‚
 		 */
 		pressUp : function() {
 			this.timer = setInterval(() => {
@@ -290,13 +297,21 @@ Vue.component('input-number', {
 	watch : {
 
 		/**
-		 * “ü—Í§ŒÀˆ—B
+		 * å…¥åŠ›åˆ¶é™å‡¦ç†ã€‚
 		 *
-		 * @param newValue “ü—Í‚³‚ê‚½•¶š—ñ
-		 * @param oldValue Œ³‚Ì•¶š—ñ
+		 * @param newValue å…¥åŠ›ã•ã‚ŒãŸæ–‡å­—åˆ—
+		 * @param oldValue å…ƒã®æ–‡å­—åˆ—
 		 */
 		displayValue : function(newValue, oldValue) {
 			let fmt = this.getFormatInfo();
+			
+			// prefix, suffix ãŒæŒ‡å®šã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ãƒã‚§ãƒƒã‚¯ã—ãªã„ã€‚
+			let prefix = fmt.match.groups.prefix;
+			if (prefix) { return; }
+			
+			let suffix = fmt.match.groups.suffix;
+			if (suffix) { return; }
+			
 			if (!fmt.info["not-fixed-input"].test(newValue)) {
 				this.displayValue = oldValue;
 			}
@@ -306,7 +321,7 @@ Vue.component('input-number', {
 
 	template: `
 		<div class="input-number">
-			<input class="input-number-text" :style="{ width: width }" type="text" v-model="displayValue" @change="changedValue($event)">
+			<input class="input-number-text" :style="{ width: width }" type="text" v-model="displayValue" @change="changedValue($event)" :readonly="isReadonly">
 			</input>
 			<div class="spin-block">
 				<svg class="spin" x="0px" y="0px" width="12px" height="10px" @click="spinUp"   @contextmenu.prevent @touchstart="pressUp"   @touchend="pressOut" @mousedown="pressUp" @mouseup="pressOut" @mouseleave="pressOut">
